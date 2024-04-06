@@ -46,4 +46,4 @@ class LFUCache(BaseCaching):
                     self.access.insert(self.access.index(key) + 1,
                                       self.access.pop(self.access.index(key)))
         return self.cache_data.get(key)
-        
+    
