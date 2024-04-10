@@ -19,9 +19,9 @@ app.config.from_object(Config)
 
 
 @babel.localeselector
-def get_locale():
+def get_locale() -> str:
     """Gets locale from URL"""
-    queries = request.query_string.decode('utf-8').plit('&')
+    queries = request.query_string.decode('utf-8').split('&')
     queryTab = dict(map(
         lambda x: (x if '=' in x else '{}='.format(x)).split('='),
         queries,
@@ -36,6 +36,8 @@ def get_locale():
 def index():
     """Returns the index.html page"""
     return render_template('4-index.html')
+
+# babel.init_app(app, locale_selector=get_locale)
 
 
 if __name__ == "__main__":
