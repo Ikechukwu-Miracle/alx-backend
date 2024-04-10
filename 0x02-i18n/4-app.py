@@ -21,17 +21,16 @@ app.config.from_object(Config)
 @babel.localeselector
 def get_locale():
     """Gets locale from URL"""
-    # queries = request.query_string.decode('utf-8').plit('&')
-    # queryTab = dict(map(
-    #     lambda x: (x if '=' in x else '{}='.format(x)).split('='),
-    #     queries,
-    # ))
+    queries = request.query_string.decode('utf-8').plit('&')
+    queryTab = dict(map(
+        lambda x: (x if '=' in x else '{}='.format(x)).split('='),
+        queries,
+    ))
 
-    # if 'locale' in queryTab:
-    #     if queryTab['locale'] in app.config['LANGUAGES']:
-    #         return queryTab['locale']
-    # return request.accept_languages.best_match(app.config['LANGUAGES'])
-    return "fr"
+    if 'locale' in queryTab:
+        if queryTab['locale'] in app.config['LANGUAGES']:
+            return queryTab['locale']
+    return request.accept_languages.best_match(app.config['LANGUAGES'])
 
 @app.route('/')
 def index():
