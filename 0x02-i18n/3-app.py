@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Basic Flask App"""
-from flask import Flask, render_template
+"""Parametrize templates"""
+from flask import Flask, render_template, request
 from flask_babel import Babel
 
 
@@ -18,10 +18,16 @@ class Config(object):
 app.config.from_object(Config)
 
 
+@babel.localeselector
+def get_locale():
+    """Gets locale from URL"""
+    return request.accept_languages.best_match(app.config['LANGUAGES'])
+
+
 @app.route('/')
 def index():
     """Returns the index.html page"""
-    return render_template('1-index.html')
+    return render_template('3-index.html')
 
 
 if __name__ == "__main__":
