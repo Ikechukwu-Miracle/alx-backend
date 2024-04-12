@@ -40,7 +40,7 @@ def before_request() -> None:
     g.user = get_user()
 
 
-#@babel.localeselector
+@babel.localeselector
 def get_locale() -> str:
     """Gets locale from URL"""
     queries = request.query_string.decode('utf-8').split('&')
@@ -59,7 +59,7 @@ def index():
     """Returns the index.html page"""
     return render_template('5-index.html')
 
-babel.init_app(app, locale_selector=get_locale)
+#babel.init_app(app, locale_selector=get_locale)
 
 
 if __name__ == "__main__":
