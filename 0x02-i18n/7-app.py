@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Parametrize templates"""
+"""Appropriate timezones"""
 from flask import Flask, render_template, request, g
 from flask_babel import Babel
 from typing import Union, Dict
+import pytz
 
 
 class Config(object):
@@ -43,16 +44,32 @@ def before_request() -> None:
 @babel.localeselector
 def get_locale() -> str:
     """Gets locale from URL"""
-    queries = request.query_string.decode('utf-8').split('&')
-    queryTab = dict(map(
-        lambda x: (x if '=' in x else '{}='.format(x)).split('='),
-        queries,
-    ))
-
-    if 'locale' in queryTab:
-        if queryTab['locale'] in app.config['LANGUAGES']:
-            return queryTab['locale']
+    locale = request.args.get('locale')
+    if locale in app.config['LANGUAGES']:
+        return locale
+    
+    if g.user and g.user['locale'] in app.config["LANGUAGES"]:
+        return g.user['locale']
+    
+    from_header = request.headers.get('locale', '')
+    if from_header in app.config["LANGUAGES"]:
+        return from_header
+    
     return request.accept_languages.best_match(app.config['LANGUAGES'])
+
+
+@babel.timezoneselector
+def get_timezone() -> str:
+    """Gets timezone from a web page"""
+    tz = request.args.get('timezone', '').strip()
+
+    if not tz and g.user:
+        tz = g.user['timezone']
+
+    try:
+        return pytz.timezone(tz).zone
+    except pytz.exceptions.UnknownTimeZoneError:
+        return app.config['BABEL_DEFAULT_TIMEZONE']
 
 
 @app.route('/')

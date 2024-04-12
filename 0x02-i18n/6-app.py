@@ -43,15 +43,17 @@ def before_request() -> None:
 @babel.localeselector
 def get_locale() -> str:
     """Gets locale from URL"""
-    queries = request.query_string.decode('utf-8').split('&')
-    queryTab = dict(map(
-        lambda x: (x if '=' in x else '{}='.format(x)).split('='),
-        queries,
-    ))
-
-    if 'locale' in queryTab:
-        if queryTab['locale'] in app.config['LANGUAGES']:
-            return queryTab['locale']
+    locale = request.args.get('locale')
+    if locale in app.config['LANGUAGES']:
+        return locale
+    
+    if g.user and g.user['locale'] in app.config["LANGUAGES"]:
+        return g.user['locale']
+    
+    from_header = request.headers.get('locale', '')
+    if from_header in app.config["LANGUAGES"]:
+        return from_header
+    
     return request.accept_languages.best_match(app.config['LANGUAGES'])
 
 
