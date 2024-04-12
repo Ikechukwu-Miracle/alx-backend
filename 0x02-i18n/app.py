@@ -41,7 +41,7 @@ def before_request() -> None:
     g.user = get_user()
 
 
-# @babel.localeselector
+@babel.localeselector
 def get_locale() -> str:
     """Gets locale from URL"""
     queries = request.query_string.decode('utf-8').split('&')
@@ -61,7 +61,7 @@ def get_locale() -> str:
     return app.config['BABEL_DEFAULT_LOCALE']
 
 
-# @babel.timezoneselector
+@babel.timezoneselector
 def get_timezone() -> str:
     """Gets timezone from a web page"""
     timezone = request.args.get('timezone', '').strip()
@@ -78,9 +78,6 @@ def index():
     """Returns the index.html page"""
     g.time = format_datetime()
     return render_template('index.html')
-
-
-babel.init_app(app, locale_selector=get_locale)
 
 
 if __name__ == "__main__":
