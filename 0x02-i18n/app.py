@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Appropriate timezones"""
 from flask import Flask, render_template, request, g
-from flask_babel import Babel
+from flask_babel import Babel, format_datetime
 from typing import Union, Dict
 import pytz
 
@@ -41,33 +41,34 @@ def before_request() -> None:
     g.user = get_user()
 
 
-@babel.localeselector
+# @babel.localeselector
 def get_locale() -> str:
     """Gets locale from URL"""
-    locale = request.args.get('locale')
-    if locale in app.config['LANGUAGES']:
+    queries = request.query_string.decode('utf-8').split('&')
+    queryTab = dict(map(
+        lambda x: (x if '=' in x else '{}='.format(x)).split('='),
+        queries,
+    ))
+    locale = queryTab.get('locale', '')
+    if locale in app.config["LANGUAGES"]:
         return locale
-
-    if g.user and g.user['locale'] in app.config["LANGUAGES"]:
-        return g.user['locale']
-
-    from_header = request.headers.get('locale', '')
-    if from_header in app.config["LANGUAGES"]:
-        return from_header
-
-    return request.accept_languages.best_match(app.config['LANGUAGES'])
+    user_details = getattr(g, 'user', None)
+    if user_details and user_details['locale'] in app.config["LANGUAGES"]:
+        return user_details['locale']
+    header_locale = request.headers.get('locale', '')
+    if header_locale in app.config["LANGUAGES"]:
+        return header_locale
+    return app.config['BABEL_DEFAULT_LOCALE']
 
 
-@babel.timezoneselector
+# @babel.timezoneselector
 def get_timezone() -> str:
     """Gets timezone from a web page"""
-    tz = request.args.get('timezone', '').strip()
-
-    if not tz and g.user:
-        tz = g.user['timezone']
-
+    timezone = request.args.get('timezone', '').strip()
+    if not timezone and g.user:
+        timezone = g.user['timezone']
     try:
-        return pytz.timezone(tz).zone
+        return pytz.timezone(timezone).zone
     except pytz.exceptions.UnknownTimeZoneError:
         return app.config['BABEL_DEFAULT_TIMEZONE']
 
@@ -75,9 +76,11 @@ def get_timezone() -> str:
 @app.route('/')
 def index():
     """Returns the index.html page"""
-    return render_template('5-index.html')
+    g.time = format_datetime()
+    return render_template('index.html')
 
-# babel.init_app(app, locale_selector=get_locale)
+
+babel.init_app(app, locale_selector=get_locale)
 
 
 if __name__ == "__main__":

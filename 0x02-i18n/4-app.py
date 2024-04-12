@@ -32,6 +32,7 @@ def get_locale() -> str:
             return queryTab['locale']
     return request.accept_languages.best_match(app.config['LANGUAGES'])
 
+
 @app.route('/')
 def index():
     """Returns the index.html page"""
